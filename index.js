@@ -62,20 +62,20 @@ app.get('/search-user', async (req, res) => {
 	}
 
 	try {
-		const profile = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
+		const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${brandToken}`,
 			},
 		});
 
-		if (!profile.ok) {
-			const errorText = await profile.text();
+		if (!profileRes.ok) {
+			const errorText = await profileRes.text();
 			console.error('[LINE API Error]', errorText);
-			return res.status(profile.status).send(errorText);
+			return res.status(profileRes.status).send(errorText);
 		}
 
-		const data = await profile.json();
+		const data = await profileRes.json();
 		res.json(data); // 回傳整個 profile 給 GAS
 	} catch (err) {
 		console.error('[Profile Error]', err);
