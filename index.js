@@ -17,8 +17,8 @@ const LINE_TOKEN_XUEMI = process.env.LINE_TOKEN_XUEMI;
 const GAS_ENDPOINT = process.env.GAS_ENDPOINT; // https://script.google.com/macros/s/XXX/exec
 
 const token = {
-	staff: LINE_TOKEN_STAFF,
-	xuemi: LINE_TOKEN_XUEMI,
+	staff: process.env.LINE_TOKEN_STAFF,
+	xuemi: process.env.LINE_TOKEN_XUEMI,
 };
 
 // 設定基本路由
@@ -56,11 +56,16 @@ async function forwardToGAS(payload, brand) {
 app.get('/search-user', async (req, res) => {
 	const { userId, brand } = req.query;
 
+	const brandToken = token[brand];
+	if (!brandToken) {
+		return res.status(400).send('Invalid brand');
+	}
+
 	try {
 		const profile = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
 			method: 'GET',
 			headers: {
-				Authorization: `Bearer ${token[brand]}`,
+				Authorization: `Bearer ${brandToken}`,
 			},
 		});
 		const data = await profile.json();
