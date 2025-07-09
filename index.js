@@ -21,23 +21,33 @@ app.get('/', (req, res) => {
 });
 
 // ✅ 接收 LINE Webhook 並轉發給 GAS
-app.post('/line-webhook', async (req, res) => {
-	try {
-		// 直接將整個 webhook payload 傳給 GAS
-		fetch(GAS_ENDPOINT, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(req.body),
-		});
-
-		return res.send('200');
-	} catch (err) {
-		console.error('[Webhook Forward Error]', err.message);
-		return res.status(500).send('fail');
-	}
+app.post('/line-webhook/staff', (req, res) => {
+	forwardToGAS(req.body, 'staff');
+	res.send('200'); // 快速回應 LINE
 });
+app.post('/line-webhook/xuemi', (req, res) => {
+	forwardToGAS(req.body, 'xuemi');
+	res.send('200'); // 快速回應 LINE
+});
+
+async function forwardToGAS(payload, brand) {
+	const enriched = {
+		...payload,
+		brand, // 加上品牌名稱/來源
+	};
+
+	try {
+		await fetch(GAS_ENDPOINT, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(enriched),
+		});
+		console.log(`✅ Webhook from ${brand} 已轉發給 GAS`);
+	} catch (err) {
+		console.error(`❌ ${brand} webhook 發送失敗`, err.message);
+	}
+}
+
 // app.post('/line-webhook', async (req, res) => {
 
 // 	try {
