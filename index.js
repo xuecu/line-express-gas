@@ -68,10 +68,17 @@ app.get('/search-user', async (req, res) => {
 				Authorization: `Bearer ${brandToken}`,
 			},
 		});
+
+		if (!profile.ok) {
+			const errorText = await profile.text();
+			console.error('[LINE API Error]', errorText);
+			return res.status(profile.status).send(errorText);
+		}
+
 		const data = await profile.json();
 		res.json(data); // 回傳整個 profile 給 GAS
 	} catch (err) {
-		console.error('[Profile Error]', err.message);
+		console.error('[Profile Error]', err);
 		res.status(500).send('fail');
 	}
 });
