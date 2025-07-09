@@ -2,11 +2,12 @@
 
 import express from 'express';
 import dotenv from 'dotenv';
-import axios from 'axios';
 import cors from 'cors';
+import fetch from 'node-fetch';
+
+const PORT = process.env.PORT || 3000;
 
 dotenv.config();
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -23,7 +24,13 @@ app.get('/', (req, res) => {
 app.post('/line-webhook', async (req, res) => {
 	try {
 		// 直接將整個 webhook payload 傳給 GAS
-		await axios.post(GAS_ENDPOINT, req.body);
+		await fetch(GAS_ENDPOINT, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(req.body),
+		});
 
 		return res.send('ok');
 	} catch (err) {
@@ -103,5 +110,4 @@ app.post('/line-webhook', async (req, res) => {
 // 	}
 // });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
