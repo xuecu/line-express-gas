@@ -12,8 +12,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+const LINE_TOKEN_STAFF = process.env.LINE_TOKEN_STAFF;
+const LINE_TOKEN_XUEMI = process.env.LINE_TOKEN_XUEMI;
 const GAS_ENDPOINT = process.env.GAS_ENDPOINT; // https://script.google.com/macros/s/XXX/exec
+
+const token = {
+	staff: LINE_TOKEN_STAFF,
+	xuemi: LINE_TOKEN_XUEMI,
+};
 
 // 設定基本路由
 app.get('/', (req, res) => {
@@ -47,38 +53,23 @@ async function forwardToGAS(payload, brand) {
 		console.error(`❌ ${brand} webhook 發送失敗`, err.message);
 	}
 }
+app.get('/search-user', async (req, res) => {
+	const { userId, brand } = req.query;
 
-// app.post('/line-webhook', async (req, res) => {
-
-// 	try {
-// 		const event = req.body.events?.[0];
-// 		if (!event || event.type !== 'message') return res.send('ignored');
-
-// 		const userId = event.source.userId;
-// 		const message = event.message.text;
-
-// 		// 查詢使用者名稱
-// 		const profileRes = await axios.get(`https://api.line.me/v2/bot/profile/${userId}`, {
-// 			headers: {
-// 				Authorization: `Bearer ${LINE_TOKEN}`,
-// 			},
-// 		});
-// 		const displayName = profileRes.data.displayName;
-
-// 		// 傳給 GAS 做紀錄
-// 		await axios.post(GAS_ENDPOINT, {
-// 			userId,
-// 			message,
-// 			name: displayName,
-// 			time: new Date().toISOString(),
-// 		});
-
-// 		return res.send('ok');
-// 	} catch (err) {
-// 		console.error('[Webhook Error]', err.message);
-// 		return res.status(500).send('fail');
-// 	}
-// });
+	try {
+		const profile = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token[brand]}`,
+			},
+		});
+		const data = await profile.json();
+		res.json(data); // 回傳整個 profile 給 GAS
+	} catch (err) {
+		console.error('[Profile Error]', err.message);
+		res.status(500).send('fail');
+	}
+});
 
 // ✅ GAS 可用此 API 發送訊息
 // app.post('/push-message', async (req, res) => {
