@@ -32,7 +32,7 @@ app.post('/line-webhook', async (req, res) => {
 			body: JSON.stringify(req.body),
 		});
 
-		return res.send('ok');
+		return res.send('200');
 	} catch (err) {
 		console.error('[Webhook Forward Error]', err.message);
 		return res.status(500).send('fail');
