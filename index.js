@@ -12,13 +12,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const LINE_TOKEN_STAFF = process.env.LINE_TOKEN_STAFF;
-const LINE_TOKEN_XUEMI = process.env.LINE_TOKEN_XUEMI;
 const GAS_ENDPOINT = process.env.GAS_ENDPOINT; // https://script.google.com/macros/s/XXX/exec
 
 const token = {
 	staff: process.env.LINE_TOKEN_STAFF,
 	xuemi: process.env.LINE_TOKEN_XUEMI,
+	nschool: process.env.LINE_TOKEN_NSCHOOL,
+	kkschool: process.env.LINE_TOKEN_KKSCHOOL,
 };
 
 // 設定基本路由
@@ -33,6 +33,14 @@ app.post('/line-webhook/staff', (req, res) => {
 });
 app.post('/line-webhook/xuemi', (req, res) => {
 	forwardToGAS(req.body, 'xuemi');
+	res.send('200'); // 快速回應 LINE
+});
+app.post('/line-webhook/nschool', (req, res) => {
+	forwardToGAS(req.body, 'nschool');
+	res.send('200'); // 快速回應 LINE
+});
+app.post('/line-webhook/kkschool', (req, res) => {
+	forwardToGAS(req.body, 'kkschool');
 	res.send('200'); // 快速回應 LINE
 });
 
@@ -62,6 +70,7 @@ app.get('/search-user', async (req, res) => {
 	}
 
 	try {
+		console.log('[DEBUG] Authorization Header:', `Bearer ${brandToken}`);
 		const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
 			method: 'GET',
 			headers: {
