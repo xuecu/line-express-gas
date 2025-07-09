@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 app.post('/line-webhook', async (req, res) => {
 	try {
 		// 直接將整個 webhook payload 傳給 GAS
-		await fetch(GAS_ENDPOINT, {
+		fetch(GAS_ENDPOINT, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
