@@ -35,6 +35,10 @@ app.post('/line-webhook/xuemi', (req, res) => {
 	forwardToGAS(req.body, 'xuemi');
 	res.send('200'); // 快速回應 LINE
 });
+app.post('/line-webhook/sixdigital', (req, res) => {
+	forwardToGAS(req.body, 'sixdigital');
+	res.send('200'); // 快速回應 LINE
+});
 app.post('/line-webhook/nschool', (req, res) => {
 	forwardToGAS(req.body, 'nschool');
 	res.send('200'); // 快速回應 LINE
