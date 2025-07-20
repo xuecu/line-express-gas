@@ -17,6 +17,7 @@ const GAS_ENDPOINT = process.env.GAS_ENDPOINT; // https://script.google.com/macr
 const token = {
 	staff: process.env.LINE_TOKEN_STAFF,
 	xuemi: process.env.LINE_TOKEN_XUEMI,
+	sixdigital: process.env.LINE_TOKEN_SIXDIGITAL,
 	nschool: process.env.LINE_TOKEN_NSCHOOL,
 	kkschool: process.env.LINE_TOKEN_KKSCHOOL,
 };
