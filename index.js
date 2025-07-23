@@ -97,23 +97,54 @@ app.get('/search-user', async (req, res) => {
 	}
 });
 
+app.post('/push-message', async (req, res) => {
+	const { userId, brand, text } = req.body;
+	const brandToken = token[brand];
+	if (!brandToken) {
+		return res.status(400).send('Invalid brand');
+	}
+	try {
+		const result = await fetch(`https://api.line.me/v2/bot/message/push`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${brandToken}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				to: userId,
+				messages: [{ type: 'text', text }],
+			}),
+		});
+		if (!result.ok) {
+			const errorData = await result.json();
+			return res.status(result.status).json({ success: false, error: errorData });
+		}
+
+		const data = await result.json();
+		res.json({ success: true, data });
+	} catch (error) {
+		console.error('Push message failed:', error);
+		res.status(500).json({ success: false, error: error.message });
+	}
+});
+
 // ✅ GAS 可用此 API 發送訊息
 // app.post('/push-message', async (req, res) => {
 // 	const { userId, text } = req.body;
 // 	try {
-// 		await axios.post(
-// 			'https://api.line.me/v2/bot/message/push',
-// 			{
-// 				to: userId,
-// 				messages: [{ type: 'text', text }],
-// 			},
-// 			{
-// 				headers: {
-// 					Authorization: `Bearer ${LINE_TOKEN}`,
-// 					'Content-Type': 'application/json',
-// 				},
-// 			}
-// 		);
+// await axios.post(
+// 	'https://api.line.me/v2/bot/message/push',
+// 	{
+// 		to: userId,
+// 		messages: [{ type: 'text', text }],
+// 	},
+// 	{
+// 		headers: {
+// 			Authorization: `Bearer ${LINE_TOKEN}`,
+// 			'Content-Type': 'application/json',
+// 		},
+// 	}
+// );
 // 		res.send('message sent');
 // 	} catch (err) {
 // 		console.error('[Push Error]', err.message);
