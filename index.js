@@ -21,6 +21,21 @@ const token = {
 	nschool: process.env.LINE_TOKEN_NSCHOOL,
 	kkschool: process.env.LINE_TOKEN_KKSCHOOL,
 };
+const tag = {
+	staff: {},
+	xuemi: {
+		newStudent: 'agketkas62xmdfrveqlm4anfai',
+	},
+	sixdigital: {
+		newStudent: 'agketj3lkllmu7zk65ktdvqtai',
+	},
+	nschool: {
+		newStudent: 'agketke3az66qzrygy6clu2eai',
+	},
+	kkschool: {
+		newStudent: 'agketkgvsb66qzrygy6cl5oqai',
+	},
+};
 
 // 設定基本路由
 app.get('/', (req, res) => {
@@ -126,6 +141,52 @@ app.post('/push-message', async (req, res) => {
 		console.error('Push message failed:', error);
 		res.status(500).json({ success: false, error: error.message });
 	}
+});
+
+app.post('/remove-tag', async (req, res) => {
+	const { userId, brand, tagKeys } = req.body;
+	const brandToken = token[brand];
+	if (!brandToken) {
+		return res.status(400).send('Invalid brand');
+	}
+	if (!tagKeys || !Array.isArray(tagKeys) || tagKeys.length === 0) {
+		return res.status(400).json({ success: false, message: 'No tagKeys provided' });
+	}
+	const failed = [];
+	const success = [];
+
+	for (const tagKey of tagKeys) {
+		const tagId = tag[brand][tagKey];
+		if (!tagId) {
+			failed.push({ tagKey, reason: 'Tag not found in config' });
+			continue;
+		}
+		try {
+			const result = await fetch(`https://api.line.me/v2/bot/tag/user/${userId}/remove`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${brandToken}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ tagId: tagId }),
+			});
+			if (result.ok) {
+				success.push(tagKey);
+			} else {
+				const errorData = await result.json();
+				failed.push({ tagKey, reason: errorData });
+			}
+		} catch (error) {
+			failed.push({ tagKey, reason: error.message });
+		}
+	}
+	// ✅ 回應結果統一格式
+	return res.json({
+		success: failed.length === 0,
+		message: 'Tag removal completed',
+		removed: success,
+		failed,
+	});
 });
 
 // ✅ GAS 可用此 API 發送訊息
